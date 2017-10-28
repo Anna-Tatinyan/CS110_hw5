@@ -1,0 +1,92 @@
+ <canvas id="canvas" width = "500" height = "600"> </canvas> 
+    <script>
+
+
+      const canvas = document.getElementById("canvas");
+      const context = canvas.getContext("2d");
+      const numPoints = 10; ////COUNT(enemies) can change it into any other number
+      const randompick = function(num) {
+          return Math.floor(Math.random() * num)+1; 
+      };
+  
+      const arr = []; //empty array for later use
+    
+      const Arrcolor = ["indianred", "salmon", "crimson", "palevioletred", "lightcoral", "blueviolet"]; //range of colors
+      const forEach = function(arr, func){
+          const helper = function(index){
+              if (index === arr.length){
+                  return;
+          }
+          
+              func(arr[index]);
+          
+              helper(index + 1);
+          };
+          helper(0);
+      };
+
+    
+      const createPoints = function(count, w, h) {
+       
+          if(count === 0) {
+              return;
+          }
+
+          arr.push({
+              x       : randompick(w - 30), //random x
+              y       : randompick(h - 30), //random y
+              width   : 30,
+              height  : 30,
+              xDelta  : 4,
+              yDelta  : 4,
+              color   : Arrcolor[randompick(6)-1]   //random color
+            });
+      
+          createPoints(count-1, w, h);
+      };
+
+      createPoints(numPoints, canvas.width, canvas.height);
+
+      const draw = function() {
+          context.clearRect(0,0, canvas.width, canvas.height);
+          forEach(arr, function (arr) {
+              context.fillStyle = arr.color;
+              context.fillRect(arr.x, arr.y, arr.width, arr.height);
+          });
+      };
+
+      const update = function() {
+
+          forEach(arr, function(arr) {
+              if (arr.x >= canvas.width - arr.width) {
+                  arr.xDelta = - randompick(15); //random speed after hitting the right wall
+              }
+                else if (arr.x <= 0) {
+                    arr.xDelta = randompick(5); //random speed after hitting the left wall
+                }
+        
+
+              if (arr.y >= canvas.height - arr.height){
+              arr.yDelta = - randompick(10); //random speed after hitting top
+              } 
+
+                else if(arr.y <= 0) {
+                    arr.yDelta = randompick(15); //after speed after hitting bottom
+                }
+
+              arr.x += arr.xDelta;
+              arr.y += arr.yDelta;
+          });
+      };
+      
+
+    
+      const loop = function() {
+          draw();
+          update();
+          requestAnimationFrame(loop);
+      };
+     loop();
+
+    </script>
+   

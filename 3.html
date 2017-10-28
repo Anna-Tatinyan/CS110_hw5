@@ -1,0 +1,228 @@
+
+<canvas id ="canvas" width = "1350" height = "750"></canvas>
+    <script>
+  
+
+        const canvas = document.getElementById("canvas");
+        const context = canvas.getContext("2d");
+        alert("Hey, IF YOU WANT TO WIN, CATCH URSULA, DO NOT LET OCTOPI CATCH YOU FIRST!!! Use left key - to hide behind the wall (but you need to leave the shelter sooner or later), up key - to jump, right key - to go right.         Good luck :)"); //intro to game
+
+        const numPoints = 2; //COUNT(enemies) can change it into any other number
+        const background = new Image();  
+        background.src = 'https://img.clipartxtras.com/59198c0a2a9ab346bc4a9045a26659fb_little-mermaid-game-background-buscar-con-google-backgrounds-under-the-sea-background-clipart_725-433.jpeg';
+  
+        const BobImg = new Image();
+        BobImg.src = "https://vignette1.wikia.nocookie.net/spongebob/images/3/3e/Walking2.png/revision/latest?cb=20140824163703";
+
+        const badGuyImg = new Image();
+        badGuyImg.src = "https://vignette.wikia.nocookie.net/disney/images/b/b3/Ursula_3.png/revision/latest?cb=20141004232347";
+
+        const badGuysImg = new Image();
+        badGuysImg.src = "https://cdn.pixabay.com/photo/2016/03/31/17/57/cartoon-1294020_960_720.png";
+
+        const floorY = canvas.height - 350; //the ground
+
+        const randompick = function(num) {
+          return Math.floor(Math.random() * num)+1; 
+        };
+
+        const enemies = []; //empty array for later use
+
+        const datagame = {
+            hero  : {
+              x       : 100,
+              y       : floorY,
+              width   : 150,
+              img     : BobImg,
+              height  : 200,
+              xDelta  : 0,
+              yDelta  : 0
+            },
+            ursula: { 
+              x       : canvas.width - 400,
+              y       : canvas.height - 300,
+              width   : 400,
+              img     : badGuyImg,
+              height  : 300,
+              xDelta  : 2,
+              yDelta  : 2
+            },
+        };
+  
+        const maxJumpheight = floorY - (datagame.hero.height*1.5); //limit
+
+        const leftKey = 37;
+        const upKey = 38;
+        const rightKey = 39;
+        const downKey = 40;
+
+        addEventListener('keydown', function(event) {
+    
+            const hero = datagame.hero;
+    
+            if(event.keyCode === rightKey) {
+              hero.x = hero.x + 10;
+                if(hero.x >= canvas.width - hero.width){
+              hero.x = 0; //from the end to the start
+                }
+            }
+              else if(event.keyCode === leftKey) {
+                  hero.x = hero.x - 10;
+          
+            
+              } 
+
+              else if (event.keyCode === upKey) {
+                  if(hero.yDelta === 0) {
+                      hero.yDelta = 5;
+                      hero.y -= hero.yDelta;
+                  }
+                 
+              }
+      
+        }, false); 
+
+        const forEach = function(arr, func){
+
+            const helper = function(index){
+
+                if (index === arr.length){
+                return;
+                }
+          
+                func(arr[index]);
+          
+                helper(index + 1);
+
+            };
+
+            helper(0);
+          
+        };
+    
+        const createPoints = function(count, w, h) {
+       
+            if(count === 0) {
+                return;
+        }
+
+            enemies.push({
+              x      : randompick(w - 20), //for random x
+              y      : randompick(h - 20), //for random y
+              width  : 150,
+              height : 120,
+              xDelta : 4,
+              yDelta : 4,
+              img    : badGuysImg
+            });
+      
+            createPoints(count-1, w, h);
+
+        };
+      
+        createPoints(numPoints, canvas.width, canvas.height);
+
+
+        const collision = function() { // to figure out when objects have common points
+
+            const ursula = datagame.ursula;
+            const hero = datagame.hero;
+      
+            if (hero.x < ursula.x + ursula.width  && hero.x + hero.width  > ursula.x &&
+                hero.y < ursula.y + ursula.height && hero.y + hero.height > ursula.y) {
+
+                    alert("You caught Ursula!!!"); //then you win
+              
+            }
+  
+            forEach(enemies, function(enemy){
+        
+                  if((hero.x <= enemy.x && enemy.x <= hero.x + hero.width) ||
+                      (hero.x <= enemy.x + enemy.width &&  enemy.width + enemy.x <= hero.x + hero.width)){
+                      if((hero.y <= enemy.y && enemy.y <= hero.y + hero.height) ||
+                          (hero.y <= enemy.y + enemy.height &&  enemy.height + enemy.y <= hero.y + hero.height)) {
+                              alert("Game Over!!!"); //you loose
+
+                      enemies.splice(0, enemies.length);
+              
+                      }
+                  }
+            });
+
+        };
+      
+     
+        const draw = function() {
+    
+            context.drawImage(background, 0, 0, canvas.width, canvas.height);
+   
+            const hero = datagame.hero;
+            context.drawImage(BobImg, hero.x, hero.y, hero.width, hero.height)
+
+            const ursula = datagame.ursula;   
+            context.drawImage(badGuyImg, ursula.x, ursula.y, ursula.width, ursula.height);
+
+
+            forEach(enemies, function (enemy) {
+                context.drawImage(badGuysImg, enemy.x, enemy.y, enemy.width, enemy.height)
+            });
+        };
+
+   
+        const update = function() {
+
+
+            const hero = datagame.hero; // after jumping back to the ground
+                if (hero.yDelta !== 0){
+                        hero.y = hero.y - hero.yDelta;
+                    if(hero.y <= maxJumpheight){
+                            hero.yDelta = -hero.yDelta;
+                    } else if(hero.y >= floorY) {
+                                hero.y = floorY;
+                                hero.yDelta = 0;
+                      }
+                };
+
+            forEach(enemies, function(enemy) { //onctopi going randomly
+                if(enemy.x >= canvas.width - enemy.width){
+                    enemy.xDelta = - randompick(6);
+                } else if(enemy.x <= 0){
+                      enemy.xDelta = randompick(6);
+                  }
+            
+                if(enemy.y >= canvas.height - enemy.height){
+                    enemy.yDelta = -6;
+                } else if(enemy.y <= 0){
+                      enemy.yDelta = 6;
+            }
+            enemy.x += enemy.xDelta;
+            enemy.y += enemy.yDelta;
+        
+        });
+
+        const ursula = datagame.ursula; //Ursula going up and down
+  
+            if (ursula.y >= canvas.height - ursula.height){
+                ursula.yDelta = -3;
+            } else if (ursula.y <= 0) {
+                    ursula.yDelta = 3;
+              }
+
+            ursula.y = ursula.y + ursula.yDelta;
+
+            collision();
+        };
+    
+        const loop = function() {
+            draw();
+            update();
+            requestAnimationFrame(loop);
+    
+        };
+  
+
+        loop();
+  
+ 
+  
+    </script>
