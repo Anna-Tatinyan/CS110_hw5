@@ -5,9 +5,9 @@
 
         const canvas = document.getElementById("canvas");
         const context = canvas.getContext("2d");
-        alert("Hey, IF YOU WANT TO WIN, CATCH URSULA, DO NOT LET OCTOPI CATCH YOU FIRST!!! Use left key - to hide behind the wall (but you need to leave the shelter sooner or later), up key - to jump, right key - to go right.         Good luck :)"); //intro to game
+        alert("Hey, IF YOU WANT TO WIN, CATCH URSULA, DO NOT LET OCTOPI CATCH YOU FIRST!!! Use left arrow key - to hide behind the wall (but you need to leave the shelter sooner or later), up arrow key - to go up, down arrow key - to go down, right arrow key - to go right. Good luck :)"); //intro to game
 
-        const numPoints = 2; //COUNT(enemies) can change it into any other number
+        const numPoints = 3; //COUNT(enemies) can change it into any other number
         const background = new Image();  
         background.src = 'https://img.clipartxtras.com/59198c0a2a9ab346bc4a9045a26659fb_little-mermaid-game-background-buscar-con-google-backgrounds-under-the-sea-background-clipart_725-433.jpeg';
   
@@ -36,7 +36,7 @@
               img     : BobImg,
               height  : 200,
               xDelta  : 0,
-              yDelta  : 0
+              yDelta  : 15
             },
             ursula: { 
               x       : canvas.width - 400,
@@ -49,7 +49,7 @@
             },
         };
   
-        const maxJumpheight = floorY - (datagame.hero.height*1.5); //limit
+       
 
         const leftKey = 37;
         const upKey = 38;
@@ -61,9 +61,9 @@
             const hero = datagame.hero;
     
             if(event.keyCode === rightKey) {
-              hero.x = hero.x + 10;
-                if(hero.x >= canvas.width - hero.width){
-              hero.x = 0; //from the end to the start
+                hero.x = hero.x + 10;
+                  if(hero.x >= canvas.width - hero.width){
+                      hero.x = 0; //from the end to the start
                 }
             }
               else if(event.keyCode === leftKey) {
@@ -73,12 +73,21 @@
               } 
 
               else if (event.keyCode === upKey) {
-                  if(hero.yDelta === 0) {
-                      hero.yDelta = 5;
-                      hero.y -= hero.yDelta;
+                  hero.y = hero.y - hero.yDelta;
+                  if(hero.y <= 0) {
+                    hero.y = canvas.height - hero.height;
                   }
-                 
               }
+                 
+              
+              else if (event.keyCode === downKey) {
+                  hero.y = hero.y + hero.yDelta;
+                  if(hero.y >= canvas.height - hero.height) {
+                    hero.y = 0;
+                  }
+              }
+                 
+              
       
         }, false); 
 
@@ -171,18 +180,6 @@
    
         const update = function() {
 
-
-            const hero = datagame.hero; // after jumping back to the ground
-                if (hero.yDelta !== 0){
-                        hero.y = hero.y - hero.yDelta;
-                    if(hero.y <= maxJumpheight){
-                            hero.yDelta = -hero.yDelta;
-                    } else if(hero.y >= floorY) {
-                                hero.y = floorY;
-                                hero.yDelta = 0;
-                      }
-                };
-
             forEach(enemies, function(enemy) { //onctopi going randomly
                 if(enemy.x >= canvas.width - enemy.width){
                     enemy.xDelta = - randompick(6);
@@ -198,20 +195,20 @@
             enemy.x += enemy.xDelta;
             enemy.y += enemy.yDelta;
         
-        });
+            });
 
-        const ursula = datagame.ursula; //Ursula going up and down
+            const ursula = datagame.ursula; //Ursula going up and down
   
-            if (ursula.y >= canvas.height - ursula.height){
-                ursula.yDelta = -3;
-            } else if (ursula.y <= 0) {
+                if (ursula.y >= canvas.height - ursula.height){
+                    ursula.yDelta = -3;
+                } else if (ursula.y <= 0) {
                     ursula.yDelta = 3;
-              }
+                  }
 
-            ursula.y = ursula.y + ursula.yDelta;
+                ursula.y = ursula.y + ursula.yDelta;
 
-            collision();
-        };
+                collision();
+            };
     
         const loop = function() {
             draw();
